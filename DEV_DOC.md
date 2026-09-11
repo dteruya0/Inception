@@ -16,9 +16,9 @@ Para operação do dia a dia, veja `USER_DOC.md`.
 | docker compose | plugin v2 |
 | GNU Make | qualquer versão recente |
 
-O projeto foi desenvolvido e testado em uma VM QEMU/KVM com 4 GB de RAM e
-2 vCPUs. VirtualBox também funciona, desde que a versão seja compatível com o
-kernel do host.
+O projeto foi desenvolvido e testado em uma VM VirtualBox com 4 GB de RAM e
+2 vCPUs, rodando Debian 12 (bookworm). QEMU/KVM também funciona, desde que o
+Docker esteja instalado na VM.
 
 ### Instalação do Docker no Debian
 

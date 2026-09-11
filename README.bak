@@ -81,7 +81,7 @@ certificado é auto-assinado, conforme exigido pelo subject.
 
 ---
 
-## Project description
+## Requirements
 
 ### Regras respeitadas
 
@@ -104,48 +104,6 @@ certificado é auto-assinado, conforme exigido pelo subject.
 O arquivo `srcs/.env` **não está versionado** e consta no `.gitignore`. Ele
 concentra as credenciais do banco e do WordPress, e deve ser criado localmente
 antes da primeira execução. O modelo está em `USER_DOC.md`.
-
-### Comparações
-
-**Máquinas virtuais vs Docker.** Uma VM virtualiza hardware: cada uma carrega um
-kernel próprio, processos de sistema e gigabytes de disco, levando minutos para
-subir. Um container compartilha o kernel do host — é apenas um processo isolado
-por namespaces e limitado por cgroups, ocupando megabytes e subindo em segundos.
-Isolar os três serviços deste projeto com VMs exigiria três sistemas
-operacionais completos; com containers, os três cabem numa única VM. Não são
-substitutos: container isola processo, VM isola sistema operacional. Quando se
-precisa de outro kernel ou de isolamento forte de segurança, a VM continua sendo
-a escolha certa. Este projeto usa os dois em conjunto.
-
-**Secrets vs variáveis de ambiente.** Este projeto usa variáveis de ambiente
-através do `.env`, que é o mínimo exigido pelo subject. A limitação é que uma
-variável de ambiente fica visível para qualquer processo dentro do container —
-um `docker exec ... env` a exibe em texto puro, e ela também aparece em
-`docker inspect` e em logs que despejem o ambiente. Docker secrets resolvem isso
-montando a credencial como arquivo em `/run/secrets/`, com dono e permissão
-controlados: a senha não aparece por acidente, só para quem a buscar
-explicitamente. Em produção, secrets seriam a escolha adequada.
-
-**Docker network vs host network.** Este projeto usa uma rede bridge dedicada,
-`inception`, onde cada container recebe um IP interno e é alcançado pelo nome do
-serviço, resolvido pelo DNS interno do Docker — daí `fastcgi_pass wordpress:9000`
-e a conexão do WordPress em `-h mariadb`, sem endereço fixo, já que o IP muda a
-cada reinício. Com `network_mode: host`, os containers usariam a interface da
-máquina diretamente: o MariaDB escutaria na 3306 e o php-fpm na 9000 do próprio
-host, expondo serviços que devem permanecer internos e violando a exigência de
-que o nginx seja a única entrada. A resolução por nome também se perderia, já
-que não haveria rede isolada. Host network tem vantagem marginal de desempenho
-por eliminar a tradução de endereços, mas ao custo de todo o isolamento.
-
-**Volumes vs bind mounts.** Um volume nomeado é gerenciado pelo Docker, que o
-armazena em seu próprio diretório e cuida de permissões e ciclo de vida. Um bind
-mount aponta para um caminho específico do host, que fica sob responsabilidade
-do usuário. Este projeto declara volumes nomeados com `driver_opts` usando
-`type: none` e `o: bind`, o que resulta em volumes formalmente nomeados cujo
-armazenamento é um caminho fixo do host — `/home/dteruya/data/` —, atendendo à
-exigência do subject sobre a localização dos dados sem abrir mão da declaração
-via seção `volumes:`. Volumes nomeados puros seriam mais portáveis; bind mounts
-dão controle explícito sobre onde os dados residem, que é o que o projeto pede.
 
 ### Decisões técnicas
 
@@ -183,26 +141,16 @@ inicialização jamais executaria.
 
 ---
 
-## Resources
-
-### Documentação e referências
-
-- Documentação oficial do Docker — https://docs.docker.com
-- Docker Compose file reference — https://docs.docker.com/compose/compose-file/
-- Dockerfile best practices — https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
-- Documentação do NGINX — https://nginx.org/en/docs/
-- Documentação do MariaDB — https://mariadb.com/kb/en/documentation/
-- WP-CLI handbook — https://make.wordpress.org/cli/handbook/
-- Manual do php-fpm — https://www.php.net/manual/en/install.fpm.php
-- Sobre PID 1 em containers — https://docs.docker.com/engine/reference/run/#specify-an-init-process
-
-### Uso de IA
+## Uso de IA
 
 Neste projeto, a utilização da IA foi fundamental para o avanço do meu conhecimento e para o melhor entendimento dos conceitos envolvidos. Devido ao curto período de tempo que tive para desenvolver o projeto, a IA serviu como uma importante ferramenta de apoio durante o processo de aprendizado, permitindo que eu revisasse os conteúdos de forma mais rápida e aprofundada.
 
 Através desse auxílio, consegui compreender melhor não apenas o que deveria ser desenvolvido no projeto, mas também os conceitos que estão por trás das ferramentas e tecnologias utilizadas. Isso foi especialmente importante para entender o funcionamento do Docker e dos containers, suas finalidades e a forma como eles se relacionam dentro do projeto.
 
 Além de auxiliar na resolução de dúvidas pontuais, a IA também contribuiu para que eu pudesse revisar os conteúdos e validar meu entendimento ao longo do desenvolvimento. Dessa forma, consegui avançar no projeto com uma visão mais clara sobre o que estava sendo feito e, principalmente, compreender os motivos por trás de cada etapa, em vez de apenas seguir instruções ou reproduzir comandos.
+
+
+---
 
 ## Estrutura do repositório
 
